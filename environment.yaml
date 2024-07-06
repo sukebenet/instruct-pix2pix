@@ -36,3 +36,4 @@ dependencies:
     - gradio
     - seaborn
     - git+https://github.com/crowsonkb/k-diffusion.git
+    - taming-transformers-rom1504
