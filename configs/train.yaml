@@ -5,7 +5,7 @@ model:
   base_learning_rate: 1.0e-04
   target: ldm.models.diffusion.ddpm_edit.LatentDiffusion
   params:
-    ckpt_path: stable_diffusion/models/ldm/stable-diffusion-v1/v1-5-pruned-emaonly.ckpt
+    ckpt_path: stable_diffusion/models/ldm/stable-diffusion-v1/cyberrealistic_v50.ckpt
     linear_start: 0.00085
     linear_end: 0.0120
     num_timesteps_cond: 1
