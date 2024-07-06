@@ -247,7 +247,7 @@ def main():
             with open(prompt_dir.joinpath("prompt.json"), "w") as fp:
                 json.dump(prompt, fp)
 
-            cond = model.get_learned_conditioning([prompt["caption"], prompt["output"]])
+            cond = model.get_learned_conditioning([prompt["input"], prompt["output"]])
             results = {}
 
             with tqdm(total=opt.n_samples, desc="Samples") as progress_bar:
@@ -258,7 +258,7 @@ def main():
                         continue
                     torch.manual_seed(seed)
 
-                    x = torch.randn(1, 4, 512 // 8, 512 // 8, device="cuda") * sigmas[0]
+                    x = torch.randn(1, 4, 256 // 8, 256 // 8, device="cuda") * sigmas[0]
                     x = repeat(x, "1 ... -> n ...", n=2)
 
                     model_wrap_cfg = CFGDenoiser(model_wrap)
@@ -273,7 +273,7 @@ def main():
                     x1 = x_samples_ddim[1]
 
                     clip_sim_0, clip_sim_1, clip_sim_dir, clip_sim_image = clip_similarity(
-                        x0[None], x1[None], [prompt["caption"]], [prompt["output"]]
+                        x0[None], x1[None], [prompt["input"]], [prompt["output"]]
                     )
 
                     results[seed] = dict(
