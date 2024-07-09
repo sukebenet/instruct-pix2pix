@@ -93,6 +93,10 @@ def load_model_from_config(config, ckpt, vae_ckpt=None, verbose=False):
         print(u)
     return model
 
+def load_lora_checkpoint(model, lora_ckpt):
+    lora_sd = torch.load(lora_ckpt, map_location="cpu")
+    model.load_state_dict(lora_sd, strict=False)
+    print(f"Loaded LoRA checkpoint from {lora_ckpt}")
 
 class CFGDenoiser(nn.Module):
     def __init__(self, model):
@@ -136,13 +140,18 @@ def main():
     parser.add_argument(
         "--vae-ckpt",
         type=str,
-        default="stable_diffusion/models/ldm/stable-diffusion-v1/vae-ft-mse-840000-ema-pruned.ckpt",
         help="Path to vae checkpoint.",
+    )
+    parser.add_argument(
+        "--lora-ckpt",
+        type=str,
+        default=None,
+        help="Path to LoRA checkpoint.",
     )
     parser.add_argument(
         "--image-size",
         type=int,
-        default=1024,
+        default=512,
         help="",
     )
     parser.add_argument(
@@ -228,6 +237,10 @@ def main():
         ckpt=opt.ckpt,
         vae_ckpt=opt.vae_ckpt,
     )
+
+    if opt.lora_ckpt:
+        load_lora_checkpoint(model, opt.lora_ckpt)
+
     model.cuda().eval()
     model_wrap = k_diffusion.external.CompVisDenoiser(model)
 
@@ -243,7 +256,7 @@ def main():
     prompts = np.array_split(list(enumerate(prompts)), opt.n_partitions)[opt.partition]
 
     with torch.no_grad(), torch.autocast("cuda"), model.ema_scope():
-        uncond = model.get_learned_conditioning(2 * [""])
+        #uncond = model.get_learned_conditioning(2 * [""])
         sigmas = model_wrap.get_sigmas(opt.steps)
 
         for i, prompt in tqdm(prompts, desc="Prompts"):
@@ -254,6 +267,7 @@ def main():
                 json.dump(prompt, fp)
 
             cond = model.get_learned_conditioning([prompt["input"], prompt["output"]])
+            uncond = model.get_learned_conditioning([prompt["negative"], prompt["negative"]])
             results = {}
 
             with tqdm(total=opt.n_samples, desc="Samples") as progress_bar:
