@@ -140,6 +140,12 @@ def main():
         help="Path to vae checkpoint.",
     )
     parser.add_argument(
+        "--image-size",
+        type=int,
+        default=1024,
+        help="",
+    )
+    parser.add_argument(
         "--steps",
         type=int,
         default=100,
@@ -258,7 +264,7 @@ def main():
                         continue
                     torch.manual_seed(seed)
 
-                    x = torch.randn(1, 4, 256 // 8, 256 // 8, device="cuda") * sigmas[0]
+                    x = torch.randn(1, 4, opt.image_size // 8, opt.image_size // 8, device="cuda") * sigmas[0]
                     x = repeat(x, "1 ... -> n ...", n=2)
 
                     model_wrap_cfg = CFGDenoiser(model_wrap)
