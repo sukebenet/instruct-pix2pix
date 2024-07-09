@@ -43,6 +43,9 @@ condaenv.*
 # Data
 data/
 
+# Logs
+logs/
+
 # Models
 ViT-L-14.pt
 *.ckpt
